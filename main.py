@@ -11,6 +11,8 @@ from kivy.lang import Builder
 from kivy.core.window import Window
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.button import Button
+from threading import Thread
+
 from kivy.uix.floatlayout import FloatLayout
 from kivy.graphics import *
 from kivy.uix.popup import Popup
@@ -98,16 +100,77 @@ class MainScreen(Screen):
         return processInput
 
     def toggleArm(self):
-        print("Process arm movement here")
+        if self.ids.armControl.text == "Lower Arm":
+            cyprus.set_pwm_values(1, period_value=100000, compare_value=100000, compare_mode=cyprus.LESS_THAN_OR_EQUAL)
+            self.ids.armControl.text = "Raise Arm"
+        elif self.ids.armControl.text == "Raise Arm":
+            cyprus.set_pwm_values(1, period_value=100000, compare_value=0, compare_mode=cyprus.LESS_THAN_OR_EQUAL)
+            self.ids.armControl.text = "Lower Arm"
+
+    def roboticArm(self):
+        Thread(target = self.toggleArm).start()
+
 
     def toggleMagnet(self):
-        print("Process magnet here")
-        
+        if self.ids.magnetControl.text == "Hold Ball":
+            cyprus.set_servo_position(2,1)
+            self.ids.magnetControl.text = "Release Ball"
+        elif self.ids.magnetControl.text == "Release Ball":
+            cyprus.set_servo_position(2, .5)
+            self.ids.magnetControl.text = "Hold Ball"
+
+    def magnet(self):
+        Thread(target=self.toggleMagnet).start()
+
+    # The dime blocks the sensor and allows free movement
+
     def auto(self):
-        print("Run the arm automatically here")
+        if cyprus.read_gpio() & 0b0001:
+            self.s0.goTo(-5200)
+            while self.s0.isBusy():
+                sleep(0.2)
+            cyprus.set_pwm_values(1, period_value=100000, compare_value=100000, compare_mode=cyprus.LESS_THAN_OR_EQUAL)
+            cyprus.set_servo_position(2,1)
+            sleep(2)
+            cyprus.set_pwm_values(1, period_value=100000, compare_value=0, compare_mode=cyprus.LESS_THAN_OR_EQUAL)
+            sleep(2)
+            self.s0.start_relative_move(0.33)
+            while self.s0.isBusy():
+                sleep(0.2)
+            cyprus.set_pwm_values(1, period_value=100000, compare_value=100000, compare_mode=cyprus.LESS_THAN_OR_EQUAL)
+            sleep(1.2)
+            cyprus.set_servo_position(2, 0.5)
+            sleep(0.7)
+            cyprus.set_pwm_values(1, period_value=100000, compare_value=0, compare_mode=cyprus.LESS_THAN_OR_EQUAL)
+            sleep(2)
+            self.s0.goHome()
+
+        elif cyprus.read_gpio() & 0b0010:
+
+            self.s0.goTo(-3100)
+            while self.s0.isBusy():
+                sleep(0.2)
+            cyprus.set_pwm_values(1, period_value=100000, compare_value=100000, compare_mode=cyprus.LESS_THAN_OR_EQUAL)
+            cyprus.set_servo_position(2,1)
+            sleep(2)
+            cyprus.set_pwm_values(1, period_value=100000, compare_value=0, compare_mode=cyprus.LESS_THAN_OR_EQUAL)
+            sleep(2)
+            self.s0.start_relative_move(-0.33)
+            while self.s0.isBusy():
+                sleep(0.2)
+            cyprus.set_pwm_values(1, period_value=100000, compare_value=100000, compare_mode=cyprus.LESS_THAN_OR_EQUAL)
+            sleep(1.2)
+            cyprus.set_servo_position(2, 0.5)
+            sleep(0.7)
+            cyprus.set_pwm_values(1, period_value=100000, compare_value=0, compare_mode=cyprus.LESS_THAN_OR_EQUAL)
+            sleep(2)
+            self.s0.goHome()
 
     def setArmPosition(self, position):
-        print("Move arm here")
+        self.s0.start_relative_move(position * .1)
+
+    def setArm(self):
+        Thread(target=self.setArmPosition).start()
 
     def homeArm(self):
         arm.home(self.homeDirection)
@@ -119,7 +182,18 @@ class MainScreen(Screen):
         print("Determine if ball is on the bottom tower")
         
     def initialize(self):
-        print("Home arm and turn off magnet")
+        cyprus.initialize()
+        cyprus.set_pwm_values(1, period_value=100000, compare_value=0, compare_mode=cyprus.LESS_THAN_OR_EQUAL)
+
+        self.s0 = stepper(port=0, micro_steps=32, hold_current=20, run_current=20, accel_current=20, deaccel_current=20,
+                     steps_per_unit=200, speed=1)
+        self.s0.goTo(0)
+        cyprus.setup_servo(2)
+        self.s0.free_all()
+
+        cyprus.set_servo_position(2, 0.5)
+
+
 
     def resetColors(self):
         self.ids.armControl.color = YELLOW

@@ -42,7 +42,7 @@
             background_normal: ''
             size_hint: None,None
             size: 300,100
-            on_press: root.toggleArm()
+            on_press: root.roboticArm()
             on_release: root.resetColors()
 
         DPEAButton:
@@ -55,7 +55,7 @@
             background_normal: ''
             size_hint: None,None
             size: 300,100
-            on_press: root.toggleMagnet()
+            on_press: root.magnet()
             on_release: root.resetColors()
 
 	##################
@@ -65,8 +65,8 @@
         Slider:
             id: moveArm
             orientation: 'horizontal'
-            min: 0
-            max: 100 
+            min: -10
+            max: 10
             value: root.armPosition
             step: 1
             center_x: root.width * 0.6
