@@ -175,13 +175,14 @@ class MainScreen(Screen):
             cyprus.set_pwm_values(1, period_value=100000, compare_value=100000, compare_mode=cyprus.LESS_THAN_OR_EQUAL)
             sleep(1.2)
             cyprus.set_servo_position(2, 0.5)
-            sleep(0.7)
+            sleep(0.9)
             cyprus.set_pwm_values(1, period_value=100000, compare_value=0, compare_mode=cyprus.LESS_THAN_OR_EQUAL)
             sleep(2)
             self.s0.goHome()
 
     def setArmPosition(self, position):
-        self.s0.start_relative_move(position * .1)
+        self.s0.start_go_to_position(position * .1)
+        # self.s0.start_relative_move(position * .01)
 
     def setArm(self):
         Thread(target=self.setArmPosition).start()
