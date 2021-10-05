@@ -123,10 +123,17 @@ class MainScreen(Screen):
         Thread(target=self.toggleMagnet).start()
 
     # The dime blocks the sensor and allows free movement
+    # Short s0.start_relative_moe(1.15)
+    # Tall s0.start_relative_move(1.48)
 
     def auto(self):
         if cyprus.read_gpio() & 0b0001:
-            self.s0.goTo(-5200)
+            self.s0.go_until_press(0, 5000)
+            while self.s0.isBusy():
+                sleep(0.2)
+            self.s0.set_as_home()
+            sleep(0.8)
+            self.s0.start_relative_move(1.15)
             while self.s0.isBusy():
                 sleep(0.2)
             cyprus.set_pwm_values(1, period_value=100000, compare_value=100000, compare_mode=cyprus.LESS_THAN_OR_EQUAL)
@@ -137,6 +144,7 @@ class MainScreen(Screen):
             self.s0.start_relative_move(0.33)
             while self.s0.isBusy():
                 sleep(0.2)
+            sleep(0.8)
             cyprus.set_pwm_values(1, period_value=100000, compare_value=100000, compare_mode=cyprus.LESS_THAN_OR_EQUAL)
             sleep(1.2)
             cyprus.set_servo_position(2, 0.5)
@@ -146,8 +154,12 @@ class MainScreen(Screen):
             self.s0.goHome()
 
         elif cyprus.read_gpio() & 0b0010:
-
-            self.s0.goTo(-3100)
+            self.s0.go_until_press(0, 5000)
+            while self.s0.isBusy():
+                sleep(0.2)
+            self.s0.set_as_home()
+            sleep(0.8)
+            self.s0.start_relative_move(1.48)
             while self.s0.isBusy():
                 sleep(0.2)
             cyprus.set_pwm_values(1, period_value=100000, compare_value=100000, compare_mode=cyprus.LESS_THAN_OR_EQUAL)
@@ -156,8 +168,10 @@ class MainScreen(Screen):
             cyprus.set_pwm_values(1, period_value=100000, compare_value=0, compare_mode=cyprus.LESS_THAN_OR_EQUAL)
             sleep(2)
             self.s0.start_relative_move(-0.33)
+
             while self.s0.isBusy():
                 sleep(0.2)
+            sleep(0.8)
             cyprus.set_pwm_values(1, period_value=100000, compare_value=100000, compare_mode=cyprus.LESS_THAN_OR_EQUAL)
             sleep(1.2)
             cyprus.set_servo_position(2, 0.5)
