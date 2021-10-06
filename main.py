@@ -128,6 +128,8 @@ class MainScreen(Screen):
 
     def auto(self):
         if cyprus.read_gpio() & 0b0001:
+            cyprus.set_pwm_values(1, period_value=100000, compare_value=0, compare_mode=cyprus.LESS_THAN_OR_EQUAL)
+            sleep(0.20)
             self.s0.go_until_press(0, 5000)
             while self.s0.isBusy():
                 sleep(0.2)
@@ -154,6 +156,8 @@ class MainScreen(Screen):
             self.s0.goHome()
 
         elif cyprus.read_gpio() & 0b0010:
+            cyprus.set_pwm_values(1, period_value=100000, compare_value=0, compare_mode=cyprus.LESS_THAN_OR_EQUAL)
+            sleep(0.20)
             self.s0.go_until_press(0, 5000)
             while self.s0.isBusy():
                 sleep(0.2)
