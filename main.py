@@ -185,7 +185,7 @@ class MainScreen(Screen):
             self.s0.goHome()
 
     def setArmPosition(self, position):
-        self.s0.start_go_to_position(position * .01)
+        self.s0.start_go_to_position(position * .00001)
         # self.s0.start_relative_move(position * .01)
 
     def setArm(self):
